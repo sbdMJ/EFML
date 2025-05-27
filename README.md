@@ -36,21 +36,31 @@ $u_{\text{total}}(s)$ = $(1-\lambda(s))u_{\text{MPC}}(s) + \lambda(s)u_{\text{RL
 
 모든 방법에서 강화학습 알고리즘으로는 PPO 알고리즘을 사용하여, 에피소드 단위로 정책을 학습시켰습니다. RL 정책의 보상 함수는 착륙 오차를 최소화하고 안정적으로 착지하도록 설계되었으며, MPC Only의 경우에는 학습 과정 없이 기존 MPC 모듈을 실행했습니다. MPC+RL Residual과 Adaptive Residual의 초기 단계에서는 MPC 제어가 기본적으로 수행되므로, 에이전트의 초기 탐색이 안정적으로 이루어진다는 장점이 있습니다. 이는 초기부터 탐색하는 순수 RL에 비해 수렴을 빠르게 하고 안전성을 높여줍니다. <br>
 
-성능 비교: 실험 결과, 세 가지 방식 모두 일정 수준의 성능을 달성하였으며 최종적인 임무 성공률이나 보상에서 큰 차이는 나타나지 않았습니다. 아래는 세 접근법의 착륙 결과입니다.: <br>
+성능 비교: 실험 결과, 세 가지 방식 모두 일정 수준의 성능을 달성하였으며 최종적인 임무 성공률이나 보상에서 큰 차이는 나타나지 않았습니다. 아래는 세 접근법의 착륙 결과입니다. <br>
 
-
+**MPC Only**
 
 https://github.com/user-attachments/assets/fcaca0df-2e1d-487a-965f-1437d1f4f625
 
 
 
 
-https://github.com/user-attachments/assets/f3c58f60-2d1d-4983-b38d-e6ed4a6fc48a
+<br> **MPC + RL Residual**
+
+
+
+https://github.com/user-attachments/assets/725381c9-c8a8-447e-afe6-7d9dbc86fe69
 
 
 
 
-https://github.com/user-attachments/assets/193047e9-9d74-411d-80cd-ec3b043dedb5
+
+<br> **MPC + RL Adaptive Residual**
+
+
+
+https://github.com/user-attachments/assets/b9b0c7d9-d146-436b-82e7-25bf984093e6
+
 
 
 
