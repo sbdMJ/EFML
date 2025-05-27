@@ -44,6 +44,18 @@ https://github.com/user-attachments/assets/fcaca0df-2e1d-487a-965f-1437d1f4f625
 
 
 
+
+https://github.com/user-attachments/assets/f3c58f60-2d1d-4983-b38d-e6ed4a6fc48a
+
+
+
+
+https://github.com/user-attachments/assets/193047e9-9d74-411d-80cd-ec3b043dedb5
+
+
+
+
+
 ## 한계점: 실험 및 방법상의 제약
 
 ## 결론 및 향후 연구: Adaptive Residual의 가능성과 개선 방향
