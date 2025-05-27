@@ -38,6 +38,12 @@ $u_{\text{total}}(s)$ = $(1-\lambda(s))u_{\text{MPC}}(s) + \lambda(s)u_{\text{RL
 
 성능 비교: 실험 결과, 세 가지 방식 모두 일정 수준의 성능을 달성하였으며 최종적인 임무 성공률이나 보상에서 큰 차이는 나타나지 않았습니다. 아래는 세 접근법의 착륙 결과입니다.: <br>
 
+
+
+https://github.com/user-attachments/assets/fcaca0df-2e1d-487a-965f-1437d1f4f625
+
+
+
 ## 한계점: 실험 및 방법상의 제약
 
 ## 결론 및 향후 연구: Adaptive Residual의 가능성과 개선 방향
