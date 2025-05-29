@@ -34,13 +34,15 @@ Simulation Environment and Implementation: The experiments were conducted in the
 
 I extended this setup to allow an RL agent to generate an additional corrective force (residual force), which is added to the MPC output to produce the final control input. The adaptive weight $\lambda(s)$ was implemented as a lightweight neural network designed to map the current state to a value in the [0,1] range, determining the blending ratio between MPC and RL outputs. In summary, the MPC (expert policy) provides the base control signal, the RL (learned policy) supplies corrective adjustments, and the $\lambda(s)$ network regulates how much of the RL correction is accepted at each state.<br>
 
-+ MPC Only: 기존 MPC 제어만으로 로켓을 제어합니다.
-+ MPC + RL Residual: 고정 결합의 Residual RL 방식으로, MPC 출력 + RL 잔차를 단순 합합니다. 즉, 모든 상태에 동일한 비율로 RL 잔차를 적용하는 residual 학습 방법입니다 (기존 연구들의 방식).
-+ MPC + RL Adaptive Residual: 제안하는 방식으로, 상태마다 $\lambda(s)$를 계산하여 MPC와 RL 출력의 비율을 조절합니다. 상태에 따라서는 MPC 위주(작은 $\lambda$), 다른 상황에서는 RL 위주(큰 $\lambda$)로 제어가 이루어질 수 있습니다.
++ MPC Only: The rocket is controlled solely using the conventional MPC controller.
++ MPC + RL Residual: A fixed-combination Residual RL approach where the final control input is a simple sum of the MPC output and the RL residual. In this method, the RL residual is applied at a constant ratio across all states—representing the residual learning technique commonly used in prior studies.
++ MPC + RL Adaptive Residual: In the proposed approach, the blending ratio between MPC and RL outputs is adjusted by computing a state-dependent weight $\lambda(s)$. Depending on the state, control may rely more heavily on MPC (when $\lambda$ is small) or shift toward RL (when $\lambda$ is large).
 
-모든 방법에서 강화학습 알고리즘으로는 PPO 알고리즘을 사용하여, 에피소드 단위로 정책을 학습시켰습니다. RL 정책의 보상 함수는 착륙 오차를 최소화하고 안정적으로 착지하도록 설계되었으며, MPC Only의 경우에는 학습 과정 없이 기존 MPC 모듈을 실행했습니다. MPC+RL Residual과 Adaptive Residual의 초기 단계에서는 MPC 제어가 기본적으로 수행되므로, 에이전트의 초기 탐색이 안정적으로 이루어진다는 장점이 있습니다. 이는 초기부터 탐색하는 순수 RL에 비해 수렴을 빠르게 하고 안전성을 높여줍니다. <br>
+In all approaches, the PPO algorithm was used as the reinforcement learning method, and the policy was trained on an episode basis. The reward function for the RL policy was designed to minimize landing error and ensure a stable touchdown. In the MPC Only setting, no learning process was involved; instead, the pre-existing MPC module was directly executed.
 
-성능 비교: 실험 결과, 세 가지 방식 모두 일정 수준의 성능을 달성하였으며 최종적인 임무 성공률이나 보상에서 큰 차이는 나타나지 않았습니다. 아래는 세 접근법의 착륙 결과입니다. <br>
+For both MPC+RL Residual and Adaptive Residual methods, MPC control was primarily used in the early training stages, allowing the agent to explore in a more stable manner. This setup provides a significant advantage over pure RL, which starts exploration from scratch, by accelerating convergence and enhancing safety from the beginning. <br>
+
+Performance Comparison: The experimental results showed that all three approaches achieved a comparable level of performance, with no significant differences observed in final task success rates or reward outcomes. The following presents the landing results of the three methods. <br>
 
 **MPC Only**
 
@@ -69,16 +71,20 @@ https://github.com/user-attachments/assets/b9b0c7d9-d146-436b-82e7-25bf984093e6
 
 
 <br>
-기대와 달리 Adaptive Residual 방식이 두 다른 방법보다 눈에 띄게 우수한 성능 우위를 보이지는 못하였으며, 학습 속도나 최종 수렴값 모두 비슷한 수준을 나타냈습니다. 이는 해당 시뮬레이션 과제에서 MPC 단독으로도 이미 충분히 좋은 성능을 발휘했고, RL이 추가로 개선할 여지가 크지 않았기 때문으로 추정됩니다. 또한 RL 정책의 학습 안정성/효율의 한계로 인해 Residual이 적극적으로 활용되지 못했을 가능성도 있습니다. <br><br>
+Contrary to expectations, the Adaptive Residual method did not exhibit a clear performance advantage over the other two approaches. Both the learning speed and the final convergence values were found to be at similar levels. This is likely because the standalone MPC already demonstrated sufficiently strong performance for this particular simulation task, leaving limited room for RL to provide further improvements. Additionally, the limited learning stability and efficiency of the RL policy may have hindered the effective utilization of the residual component. <br><br>
 
-적응형 가중치 $\lambda(s)$ 분석: Adaptive Residual 구조의 핵심 지표인 $\lambda(s)$의 값을 모니터링한 결과, 전반적으로 $\lambda(s)$가 0에 가까운 값을 취하는 경향이 관찰되었습니다. 이는 대부분의 상태에서 MPC의 제어 신호를 거의 그대로 사용하고 RL 잔차는 매우 적게 더해졌음을 의미합니다. $\lambda(s)$ 분포를 보면 에피소드 동안 평균적으로 0.1 이하의 값이 많았고, 특정 상황을 제외하면 $\lambda(s)$가 크게 증가하는 경우는 드물었습니다. 다시 말해, Adaptive 구조임에도 불구하고 실제 제어는 MPC 위주로 이루어지는 빈도가 높았다는 것입니다. 이러한 결과 때문에 $\lambda(s)$가 상태에 따라 어떻게 변동하는지 뚜렷이 해석하기가 어려웠습니다. $\lambda(s)$가 거의 항상 낮게 유지되었다는 것은, RL 정책이 MPC 대비 얻는 이득이 미미하거나 RL이 자신감 있게 제어를 할만한 상황이 적었다고 볼 수 있습니다. 이는 본 환경에서 MPC의 성능이 우수하여 RL이 굳이 개입하지 않아도 되는 측면, 혹은 RL의 학습 부족으로 인해 신뢰할 만한 보정 값을 학습하지 못한 측면 둘 다 원인일 수 있습니다. 결과적으로 상태 기반 가중치의 역동적인 변화는 기대만큼 나타나지 않아, Adaptive Residual의 의도했던 이점(상황에 따른 RL 개입 조절)을 확인하기에는 어려움이 있었습니다.
+Analysis of Adaptive Weight $\lambda(s)$: Monitoring the values of $\lambda(s)$—the core indicator of the Adaptive Residual structure—revealed a general tendency for $\lambda(s)$ to remain close to zero. This indicates that, in most states, the control signal from MPC was used almost as-is, with minimal contribution from the RL residual. The distribution of $\lambda(s)$ values showed that the average often stayed below 0.1 throughout episodes, and significant increases in $\lambda(s)$ were rare, except in a few specific situations.
 
-## 한계점: 실험 및 방법상의 제약
-이번 연구 및 실험을 통해 몇 가지 한계점이 드러났습니다:
-+ RL 학습 성능 부족: RL 잔차 정책이 기대만큼의 성능 향상을 이루지 못했습니다. 이는 강화학습 알고리즘의 미성숙이나 파라미터 설정의 한계로 인해 RL 에이전트가 MPC를 능가하는 교정 신호를 학습하지 못했기 때문으로 보입니다. 결국 Adaptive 구조에서도 RL의 기여가 미미하여, MPC 단독과 큰 차이를 내지 못했습니다.
-+ 하이퍼파라미터 튜닝 미비: RL 기반 방법의 성능은 학습률, 보상 구조, 탐험 계수 등 하이퍼파라미터에 크게 좌우되는데, 본 실험에서는 이러한 매개변수를 최적화할 시간이 부족했습니다. 파라미터 튜닝이 충분하지 않으면 RL의 학습 효율 저하와 불안정으로 이어져, Residual 정책의 잠재력이 제한되었습니다.
-+ $\lambda(s)$ 해석의 불확실성: Adaptive Residual의 핵심인 $\lambda(s)$ 값에 대한 명확한 해석을 얻지 못했습니다. $\lambda(s)$가 주로 0에 가까운 현상에 대해, 왜 그런 분포가 나왔는지 (예: RL 정책의 불확실성으로 항상 MPC를 따르는 것인지, 환경 자체가 RL 개입을 덜 필요로 하는 것인지) 명확히 규명하지 못했습니다. $\lambda(s)$를 관찰하더라도 상태 특성별로 유의미한 패턴을 찾기 어려웠고, 이는 Adaptive 전략의 작동 원리를 이해하는 데 한계를 주었습니다.
-+ 시뮬레이터 state 다양성 부족: 사용된 PyRocketCraft 환경이 상대적으로 단순하고 state 다양성이 제한적인 점도 한계로 작용했습니다. 로켓 착륙이라는 과제 자체가 유사한 시나리오의 반복(예: 초기 높이와 속도 조건이 큰 차이 없음)으로 이루어지다 보니, RL이 학습을 통해 새로운 교정 전략을 발휘해야 할 상황이 적었습니다. 또한 바람이나 센서 노이즈 등의 환경 변화 요인도 제한적이어서, Adaptive Residual 구조가 빛을 발할 만한 극단 상황이 충분히 주어지지 않았습니다.
+In other words, despite being an adaptive structure, control was predominantly driven by MPC. As a result, it was difficult to clearly interpret how $\lambda(s)$ varied with different states. The consistently low values suggest either that the RL policy offered little additional benefit compared to MPC, or that there were few situations where RL was confident enough to intervene effectively. This could be due to two potential factors: the strong performance of MPC making RL involvement largely unnecessary, or insufficient learning on the RL side, preventing it from producing reliable corrective signals.
+
+Consequently, the expected dynamic modulation of RL involvement through state-based weighting did not manifest as anticipated, making it difficult to confirm the intended advantages of the Adaptive Residual approach—namely, selectively adjusting RL intervention based on situational needs.
+
+## Limitations: Constraints in Experimentation and Methodology
+Several limitations emerged through the course of this study and its experiments:
++ Insufficient RL Learning Performance: The RL residual policy did not achieve the level of performance improvement that was initially expected. This is likely due to limitations in the reinforcement learning algorithm itself or suboptimal parameter settings, which prevented the RL agent from learning corrective signals that could outperform those generated by MPC. As a result, even within the Adaptive structure, the contribution of RL remained marginal, leading to outcomes that were not significantly different from using MPC alone.
++ Insufficient Hyperparameter Tuning: The performance of RL-based methods is highly sensitive to hyperparameters such as learning rate, reward structure, and exploration coefficients. However, in this experiment, there was limited time to optimize these parameters. Inadequate tuning can lead to reduced learning efficiency and instability in RL, which in turn constrained the potential of the residual policy.
++ Uncertainty in Interpreting $\lambda(s)$: A clear interpretation of the $\lambda(s)$ values—the core component of the Adaptive Residual method—could not be obtained. The observed tendency of $\lambda(s)$ to remain close to zero raised questions about the underlying cause: whether this was due to the RL policy's uncertainty leading to default reliance on MPC, or because the environment itself required little intervention from RL. Even with direct observation of $\lambda(s)$, it was difficult to identify meaningful patterns across different state characteristics, which limited the understanding of how the Adaptive strategy was functioning in practice.
++ Limited State Diversity in the Simulator: Another limitation stemmed from the relatively simple and constrained nature of the PyRocketCraft environment. The rocket landing task involved repeated scenarios with minimal variation—such as consistent initial altitude and velocity conditions—which reduced opportunities for the RL agent to develop and apply novel corrective strategies through learning. Moreover, environmental variations such as wind disturbances or sensor noise were minimal, meaning that the Adaptive Residual architecture was rarely exposed to extreme conditions where its benefits could truly stand out.
 
 ## 결론 및 향후 연구: Adaptive Residual의 가능성과 개선 방향
 본 프로젝트를 통해 MPC와 RL의 결합을 모색한 Adaptive Residual 제어 전략의 가능성과 한계를 모두 확인할 수 있었습니다. 장점으로는, MPC를 초기 정책으로 활용함으로써 강화학습의 초기 탐색을 안정화하고 학습 효율을 높일 수 있다는 점을 실험적으로 확인했습니다. 또한 상태 기반으로 RL의 개입을 조절하려는 시도 자체는 기존 residual 학습 보다 유연한 통합 제어로 나아가는 흥미로운 방향임을 알 수 있었습니다. <br>
